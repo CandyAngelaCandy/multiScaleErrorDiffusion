@@ -2,6 +2,10 @@ package multiScaleErrorDiffusion;
 
 import java.awt.Point;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 
 import ImgOperation.ImageOperation;
 import publicClass.publicClass;
@@ -14,9 +18,13 @@ public class MED extends publicClass {
 	public static int bSize = 2;// 块的大小
 	public static int PyramidCount = (int) (Math.log(h * w) / Math.log(2 * 2));// 金字塔层级,它的值为4，其实算原始图像，
 	public static int[] sideLen = new int[PyramidCount + 1];
+	public static double[][][] pyramidImg;// 生成每层金字塔,false表示传入为小数数组
+	public static double[][] covImg;
+	public static HashMap[] map=new HashMap[PyramidCount + 1];
+	public static ArrayList[] list=new ArrayList[PyramidCount + 1];
 	
-			
-	public MED(){//构造函数：初始化每层金字塔图像的边长
+				
+	public MED(String imgName){//构造函数：初始化每层金字塔图像的边长
 		
 		// 定义数组保存每层图像边长	
 		sideLen[0] = h;//第0层为16，第PyramidCount层为1
@@ -25,15 +33,47 @@ public class MED extends publicClass {
 			int ImgWidth = (int) Math.sqrt(h * w / (Math.pow((2 * 2), (c))));
 			sideLen[c] = ImgWidth;// 保存第c层金字塔的边长，第0层边长为16，第4层边长为1.
 		}
+	    
+	    //定义每一层金字塔数组排列好的大小，list保存排列好的数组，hashMap保存原始坐标
+	    
+	    //先生成图像金字塔
+	    covImg = ImageOperation.readImg(imgName);
+	    pyramidImg = GeImgPyramid(covImg, true);
+	    for(int c = 0; c < PyramidCount + 1; c++){
+	    	double[] b = ImageOperation.matrixToArray(pyramidImg[0]);
+	    	int oneDiaArrLen = (int) Math.pow(sideLen[c], 2);
+	    		    	
+	    	for(int i=0;i<oneDiaArrLen;i++)
+	    	{
+	    	   map[c].put(b[i],i); //将值和下标存入第c层Map
+	    	}
+	    	
+	    	//排列	    	
+	    	Arrays.sort(b); //升序排列
+	    	
+	    	for(int i=0;i<oneDiaArrLen;i++)
+	    	{
+	    	   list[c].add(b[i]);
+	    	}
+	    	
+	    	//此时list[c]为降序排列的元素
+	    	Collections.reverse(list[c]); //逆序排列,变为降序	    		    	
+	    }
+	    
+	    
+	    
+	    
 	}
+	
+			
 	
 	//有五层
 	public static void main(String[] args) {
 		//imgPyramid("lena.bmp");
-		MED med = new MED();
+		MED med = new MED("lena.bmp");
 		//med.imgPyramid("lena140.bmp");
 		//med.imgPyramid("lena16.bmp");
-		med.imgPyramid("lena.bmp");
+		med.imgPyramid();
 		/*for(int i=0;i<sideLen.length;i++){
 			System.out.println(sideLen[i]);
 		}
@@ -42,9 +82,9 @@ public class MED extends publicClass {
 	}
 
 	// 图像金字塔函数
-	public  void imgPyramid(String imgName) {
+	public  void imgPyramid() {
 
-		double[][] covImg = ImageOperation.readImg(imgName);
+		
 		double[][] markImg = new double[h][w];// 生成标记图像
 
 		for (int i = 0; i < h; i++) {
@@ -56,10 +96,9 @@ public class MED extends publicClass {
 			//System.out.println();
 		}
 
-		double[][][] pyramidImg = GeImgPyramid(covImg, true);// 生成每层金字塔,false表示传入为小数数组
-
 		
 
+		
 		// 定义载体图像为X，误差矩阵E=errorMax-B和二值化矩阵BinMax，BinMax初始化为全0矩阵
 		double[][] errorMax = new double[h][w];// 误差矩阵
 		for (int i = 0; i < h; i++) {
@@ -252,7 +291,7 @@ public class MED extends publicClass {
 		//先用最笨方法，找最大值，再优化
 		//printBinImg(MarkPyraImg[layer], sideLen[layer], sideLen[layer]);
 		
-		Point p = new Point(-1,-1);
+		/*Point p = new Point(-1,-1);
 		double temp1 = -1;
 		for(int i=0;i<sideLen[layer];i++)
 			for(int j=0;j<sideLen[layer];j++){
@@ -265,7 +304,14 @@ public class MED extends publicClass {
 						p.y = j; 
 					}
 				}			
-		}
+		}*/
+		
+		double maxPix = (double)list[layer].get(0);
+		//查找原始下标
+  	    int index = 	(int) map[layer].get(b[i]);	
+  	    Point point = new Point(index/3,index%3);
+  	    System.out.println(b[i]+"("+point.x+","+point.y+")");
+		list[layer].remove(0);
 		
 		return p;
 		
