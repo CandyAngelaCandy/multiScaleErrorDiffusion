@@ -13,12 +13,12 @@ public  class publicClass {
 	/*public static int h = 512;//Í¼ÏñµÄ¸ß
 	public static int w = 512;//Í¼ÏñµÄ¿í
 */	
-	public static int h = 8;//Í¼ÏñµÄ¸ß
+	/*public static int h = 8;//Í¼ÏñµÄ¸ß
 	public static int w = 8;//Í¼ÏñµÄ¿í
-	
-	/*public static int h = 128;//Í¼ÏñµÄ¸ß
-	public static int w = 128;//Í¼ÏñµÄ¿í
 */	
+	public static int h = 128;//Í¼ÏñµÄ¸ß
+	public static int w = 128;//Í¼ÏñµÄ¿í
+	
 	/*public static int h = 140;//Í¼ÏñµÄ¸ß
 	public static int w = 140;//Í¼ÏñµÄ¿í
 */

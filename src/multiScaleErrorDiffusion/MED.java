@@ -64,7 +64,7 @@ public class MED extends publicClass {
 				MED med = new MED();
 				// med.imgPyramid("lena140.bmp");
 				// med.imgPyramid("lena16.bmp");
-				med.imgPyramid("lena~4.bmp");
+				med.imgPyramid("lena~128.bmp");
 				/*
 				 * for(int i=0;i<sideLen.length;i++){ System.out.println(sideLen[i]); }
 				 * System.out.println(sideLen);
@@ -141,6 +141,7 @@ public class MED extends publicClass {
 			// System.out.println();
 		}
 
+		System.out.println("总共查找："+count+"次");
 		//printBinImg(BinMax, h, w);// 打印出2值矩阵
 		//printBinImg(errorMax, h, w);
 		ImageOperation.printBufferedImage(BinMax, "multiScaleHalfImg");
@@ -256,7 +257,7 @@ public class MED extends publicClass {
 
 		
 		//System.out.println("m=" + m);
-		System.out.println("选取第" + m + "层金字塔最大像素值：" + pyramidImg[m][p.x][p.y]);
+		//System.out.println("选取第" + m + "层金字塔最大像素值：" + pyramidImg[m][p.x][p.y]);
 
 		if (m == 0) {// 将二值矩阵该位置置为1
 			//System.out.println("选中的位置：(" + p.x + "," + p.y + ")");
