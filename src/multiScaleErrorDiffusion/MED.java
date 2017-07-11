@@ -18,13 +18,13 @@ public class MED extends publicClass {
 	public static int bSize = 2;// 块的大小
 	public static int PyramidCount = (int) (Math.log(h * w) / Math.log(2 * 2));// 金字塔层级,它的值为4，其实算原始图像，
 	public static int[] sideLen = new int[PyramidCount + 1];
-	public static double[][][] pyramidImg;// 生成每层金字塔,false表示传入为小数数组
-	public static double[][] covImg;
-	public static HashMap[] map=new HashMap[PyramidCount + 1];
-	public static ArrayList[] list=new ArrayList[PyramidCount + 1];
+	//public static double[][][] pyramidImg;// 生成每层金字塔,false表示传入为小数数组
+	//public static double[][] covImg;
+	/*public static HashMap[] map=new HashMap[PyramidCount + 1];
+	public static ArrayList[] list=new ArrayList[PyramidCount + 1];*/
 	
 				
-	public MED(String imgName){//构造函数：初始化每层金字塔图像的边长
+	public MED(){//构造函数：初始化每层金字塔图像的边长
 		
 		// 定义数组保存每层图像边长	
 		sideLen[0] = h;//第0层为16，第PyramidCount层为1
@@ -37,7 +37,7 @@ public class MED extends publicClass {
 	    //定义每一层金字塔数组排列好的大小，list保存排列好的数组，hashMap保存原始坐标
 	    
 	    //先生成图像金字塔
-	    covImg = ImageOperation.readImg(imgName);
+	   /* covImg = ImageOperation.readImg(imgName);
 	    pyramidImg = GeImgPyramid(covImg, true);
 	    for(int c = 0; c < PyramidCount + 1; c++){
 	    	double[] b = ImageOperation.matrixToArray(pyramidImg[0]);
@@ -58,11 +58,8 @@ public class MED extends publicClass {
 	    	
 	    	//此时list[c]为降序排列的元素
 	    	Collections.reverse(list[c]); //逆序排列,变为降序	    		    	
-	    }
-	    
-	    
-	    
-	    
+	    }*/
+	    	    	   	    
 	}
 	
 			
@@ -70,10 +67,10 @@ public class MED extends publicClass {
 	//有五层
 	public static void main(String[] args) {
 		//imgPyramid("lena.bmp");
-		MED med = new MED("lena.bmp");
+		MED med = new MED();
 		//med.imgPyramid("lena140.bmp");
 		//med.imgPyramid("lena16.bmp");
-		med.imgPyramid();
+		med.imgPyramid("lena~4.bmp");
 		/*for(int i=0;i<sideLen.length;i++){
 			System.out.println(sideLen[i]);
 		}
@@ -82,9 +79,9 @@ public class MED extends publicClass {
 	}
 
 	// 图像金字塔函数
-	public  void imgPyramid() {
+	public  void imgPyramid(String imgName) {
 
-		
+		double[][] covImg = ImageOperation.readImg(imgName);
 		double[][] markImg = new double[h][w];// 生成标记图像
 
 		for (int i = 0; i < h; i++) {
@@ -96,7 +93,7 @@ public class MED extends publicClass {
 			//System.out.println();
 		}
 
-		
+		double[][][] pyramidImg = GeImgPyramid(covImg, true);
 
 		
 		// 定义载体图像为X，误差矩阵E=errorMax-B和二值化矩阵BinMax，BinMax初始化为全0矩阵
@@ -127,7 +124,7 @@ public class MED extends publicClass {
 		
 				
 		//！！！输出原始金字塔图像
-		//printPramidImg(pyramidImg);
+		printPramidImg(pyramidImg);
 		
 		
 		double lastLayerFlagVal = pyramidImg[PyramidCount][0][0];
@@ -137,15 +134,17 @@ public class MED extends publicClass {
 		//count<=20  138835
 		//lastLayerFlagVal >= 128//256的一半，相当于归一化后的0.5;  lastLayerFlagVal >= 0.5
 		
-		while(count <= 138835){
-			//System.out.println("第"+count+"次查找开始");
+		while(count <= 64){
+			System.out.println();
+			System.out.println();
+			System.out.println("第"+count+"次查找开始");
 			lastLayerFlagVal =searchMaxPix(errorMax, MarkPyraImg,covImg,BinMax);//没调用一次，sum++;
 			count++;
 			//System.out.println();
 		}
 		
-		//printBinImg(BinMax);//打印出2值矩阵
-		//printBinImg(errorMax,h,w);		
+		printBinImg(BinMax,h,w);//打印出2值矩阵
+		printBinImg(errorMax,h,w);		
 		ImageOperation.printBufferedImage(BinMax,"multiScaleHalfImg");
 		System.out.println("程序运行结束");
 	}
@@ -229,10 +228,11 @@ public class MED extends publicClass {
 					
 					
 		p = new Point(a,b);
-		//System.out.print("第"+layer+"层选中的坐标："+p.x+" "+p.y);
-		//System.out.println("选取第"+layer+"层金字塔最大像素值："+pyramidImg[layer][a][b]);
-						
-		for(int m=layer -1;m>-1;m--){
+		System.out.print("第"+layer+"层选中的坐标："+p.x+" "+p.y);
+		System.out.println("选取第"+layer+"层金字塔最大像素值："+pyramidImg[layer][a][b]);
+		int m=layer -1;
+		
+		for(;m>-1;m--){
 		  double temp = 0;
 							  							  
 		  Point lastLayP =new Point(p.x,p.y);//避免下面变量覆盖，互相影响
@@ -247,25 +247,30 @@ public class MED extends publicClass {
 				if(temp2>temp){//在2*2大小的块中 ，寻找最大值
 					temp=temp2; p.x = x; p.y = y; 
 				}
-									  // System.out.println();								  
+									   //System.out.println();								  
 			}
 		 }
-		//System.out.print("第"+m+"层选中的坐标："+p.x+" "+p.y);
-							  
+													 						  						  
+	  }//m循环结束
+	   m=m+1;
+		
+		System.out.print("第"+m+"层选中的坐标："+p.x+" "+p.y);
+		  
 		MarkPyraImg[m][p.x][p.y] =-1;//访问过元素标记
-							  
-		//System.out.println("选取第"+m+"层金字塔最大像素值："+temp); 
-		//System.out.println(); 
+		
+		System.out.println("m="+m); 
+		System.out.println("选取第"+m+"层金字塔最大像素值："+pyramidImg[m][p.x][p.y]); 
+		
 							  
 		if(m == 0){//将二值矩阵该位置置为1
-			//System.out.println("选中的位置：("+p.x+","+p.y+")");
+			System.out.println("选中的位置：("+p.x+","+p.y+")");
 			BinMax[p.x][p.y] = 1;//未归一化，先写为255
 			
 			//添加误差扩散，更新errorMax数组
-			//ErrDifToOtherPixel(BinMax[p.x][p.y],errorMax,p.x,p.y);
-			errorMax[p.x][p.y] = 0;//计算误差扩散到周围像素，(先不添加误差扩散)并将该位置值置为0，该矩阵能量衰减。			
-		}												 						  						  
-	 }
+			ErrDifToOtherPixel(BinMax[p.x][p.y],errorMax,p.x,p.y);
+			errorMax[p.x][p.y] =0;//计算误差扩散到周围像素，(先不添加误差扩散)并将该位置值置为0，该矩阵能量衰减。			
+		}		
+		
 						
 					
 		
@@ -273,10 +278,12 @@ public class MED extends publicClass {
 	//计算最后一个像素值
 	  double[][][] UpdatePyramidImg = GeImgPyramid(errorMax, true);//true表示传入为整数数组
 		
+		System.out.println("标记矩阵：");
+		printPramidImg(MarkPyraImg);//打印出标记矩阵
 		
-		//printPramidImg(MarkPyraImg);//打印出标记矩阵
 		
-		//printPramidImg(UpdatePyramidImg);
+		System.out.println("金字塔图像：");
+		printPramidImg(UpdatePyramidImg);
 		
 		//System.out.println(UpdatePyramidImg[PyramidCount][0][0]);
 		
@@ -291,7 +298,7 @@ public class MED extends publicClass {
 		//先用最笨方法，找最大值，再优化
 		//printBinImg(MarkPyraImg[layer], sideLen[layer], sideLen[layer]);
 		
-		/*Point p = new Point(-1,-1);
+		Point p = new Point(-1,-1);
 		double temp1 = -1;
 		for(int i=0;i<sideLen[layer];i++)
 			for(int j=0;j<sideLen[layer];j++){
@@ -304,14 +311,14 @@ public class MED extends publicClass {
 						p.y = j; 
 					}
 				}			
-		}*/
+		}
 		
-		double maxPix = (double)list[layer].get(0);
+		/*double maxPix = (double)list[layer].get(0);
 		//查找原始下标
   	    int index = 	(int) map[layer].get(b[i]);	
   	    Point point = new Point(index/3,index%3);
   	    System.out.println(b[i]+"("+point.x+","+point.y+")");
-		list[layer].remove(0);
+		list[layer].remove(0);*/
 		
 		return p;
 		
@@ -396,6 +403,7 @@ public class MED extends publicClass {
 							//pyramidImg[c][i][j] = temp;
 							pyramidImg[c][i][j] = toFixPointCount(temp / 4.0,4);
 						} else {
+							//pyramidImg[c][i][j] = Math.round(temp / 4.0);
 							//pyramidImg[c][i][j] = temp;
 							pyramidImg[c][i][j] = toFixPointCount(temp / 4.0, 4);// 当像素值为整数时，向下取整，当为小数时，取四位小数，
 							// 设置一个变量flag标识为整数，还是小数
@@ -418,7 +426,7 @@ public class MED extends publicClass {
 		/*int h=uniformImg.length;
 		int w=uniformImg[0].length;*/
 		
-		double ErrorValue=uniformImg[i][j]-BinaryValue;
+		double ErrorValue=toFixPointCount(uniformImg[i][j]-BinaryValue,4);
 		int [][] v = {{0,0,7},{3,5,1}};
 		
 		/*最左边、最右边和最下边像素使用部分滤波器，其余使用完整滤波器*/
