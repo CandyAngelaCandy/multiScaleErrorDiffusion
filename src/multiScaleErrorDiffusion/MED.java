@@ -58,15 +58,24 @@ public class MED extends publicClass {
 
 	// 有五层
 	public static void main(String[] args) {
+		long startTime = System.currentTimeMillis();    //获取开始时间
+
 		// imgPyramid("lena.bmp");
-		MED med = new MED();
-		// med.imgPyramid("lena140.bmp");
-		// med.imgPyramid("lena16.bmp");
-		med.imgPyramid("lena~4.bmp");
-		/*
-		 * for(int i=0;i<sideLen.length;i++){ System.out.println(sideLen[i]); }
-		 * System.out.println(sideLen);
-		 */
+				MED med = new MED();
+				// med.imgPyramid("lena140.bmp");
+				// med.imgPyramid("lena16.bmp");
+				med.imgPyramid("lena~4.bmp");
+				/*
+				 * for(int i=0;i<sideLen.length;i++){ System.out.println(sideLen[i]); }
+				 * System.out.println(sideLen);
+		*/
+
+		long endTime = System.currentTimeMillis();    //获取结束时间
+
+		System.out.println("程序运行时间：" + (endTime - startTime)/1000.0 + "s");    //输出程序运行时间
+		
+		
+		
 
 	}
 
@@ -114,7 +123,7 @@ public class MED extends publicClass {
 		double[][][] MarkPyraImg = GeImgPyramid(markImg, true);
 
 		// ！！！输出原始金字塔图像
-		printPramidImg(pyramidImg);
+		//printPramidImg(pyramidImg);
 
 		double lastLayerFlagVal = pyramidImg[PyramidCount][0][0];
 		System.out.println(lastLayerFlagVal);
@@ -123,17 +132,17 @@ public class MED extends publicClass {
 		// count<=20 138835
 		// lastLayerFlagVal >= 128//256的一半，相当于归一化后的0.5; lastLayerFlagVal >= 0.5
 
-		while (count <= 64) {
-			System.out.println();
-			System.out.println();
-			System.out.println("第" + count + "次查找开始");
+		while (lastLayerFlagVal >= 0.5) {
+			/*System.out.println();
+			System.out.println();*/
+			//System.out.println("第" + count + "次查找开始");
 			lastLayerFlagVal = searchMaxPix(errorMax, MarkPyraImg, covImg, BinMax);// 没调用一次，sum++;
 			count++;
 			// System.out.println();
 		}
 
-		printBinImg(BinMax, h, w);// 打印出2值矩阵
-		printBinImg(errorMax, h, w);
+		//printBinImg(BinMax, h, w);// 打印出2值矩阵
+		//printBinImg(errorMax, h, w);
 		ImageOperation.printBufferedImage(BinMax, "multiScaleHalfImg");
 		System.out.println("程序运行结束");
 	}
@@ -211,8 +220,8 @@ public class MED extends publicClass {
 		MarkPyraImg[layer][a][b] = -1;// 访问过元素标记
 
 		p = new Point(a, b);
-		System.out.print("第" + layer + "层选中的坐标：" + p.x + " " + p.y);
-		System.out.println("选取第" + layer + "层金字塔最大像素值：" + pyramidImg[layer][a][b]);
+		//System.out.print("第" + layer + "层选中的坐标：" + p.x + " " + p.y);
+		//System.out.println("选取第" + layer + "层金字塔最大像素值：" + pyramidImg[layer][a][b]);
 		int m = layer - 1;
 
 		for (; m > -1; m--) {
@@ -235,34 +244,37 @@ public class MED extends publicClass {
 					// System.out.println();
 				}
 			}
-
+			
+			MarkPyraImg[m][p.x][p.y] = -1;// 访问过元素标记
+			//System.out.print("第" + m + "层选中的坐标：" + p.x + " " + p.y);
+			//System.out.println("选取第" + m + "层金字塔最大像素值：" + pyramidImg[m][p.x][p.y]);
+			
 		} // m循环结束
 		m = m + 1;
 
-		System.out.print("第" + m + "层选中的坐标：" + p.x + " " + p.y);
+		//System.out.print("第" + m + "层选中的坐标：" + p.x + " " + p.y);
 
-		MarkPyraImg[m][p.x][p.y] = -1;// 访问过元素标记
-
-		System.out.println("m=" + m);
+		
+		//System.out.println("m=" + m);
 		System.out.println("选取第" + m + "层金字塔最大像素值：" + pyramidImg[m][p.x][p.y]);
 
 		if (m == 0) {// 将二值矩阵该位置置为1
-			System.out.println("选中的位置：(" + p.x + "," + p.y + ")");
+			//System.out.println("选中的位置：(" + p.x + "," + p.y + ")");
 			BinMax[p.x][p.y] = 1;// 未归一化，先写为255
 
 			// 添加误差扩散，更新errorMax数组
-			ErrDifToOtherPixel(BinMax[p.x][p.y], errorMax, p.x, p.y);
+			ErrDifToOtherPixel(BinMax[p.x][p.y], errorMax, MarkPyraImg ,p.x, p.y);
 			errorMax[p.x][p.y] = 0;// 计算误差扩散到周围像素，(先不添加误差扩散)并将该位置值置为0，该矩阵能量衰减。
 		}
 
 		// 计算最后一个像素值
 		double[][][] UpdatePyramidImg = GeImgPyramid(errorMax, true);// true表示传入为整数数组
 
-		System.out.println("标记矩阵：");
-		printPramidImg(MarkPyraImg);// 打印出标记矩阵
+		//System.out.println("标记矩阵：");
+		//printPramidImg(MarkPyraImg);// 打印出标记矩阵
 
-		System.out.println("金字塔图像：");
-		printPramidImg(UpdatePyramidImg);
+		//System.out.println("金字塔图像：");
+		//printPramidImg(UpdatePyramidImg);
 
 		// System.out.println(UpdatePyramidImg[PyramidCount][0][0]);
 
@@ -379,15 +391,16 @@ public class MED extends publicClass {
 					}
 
 					if (flag) {
-						// pyramidImg[c][i][j] = Math.round(temp / 4.0);
-						// pyramidImg[c][i][j] = temp;
-						// pyramidImg[c][i][j] = temp;
-						pyramidImg[c][i][j] = toFixPointCount(temp / 4.0, 4);
+						//pyramidImg[c][i][j] = Math.round(temp / 4.0);
+						// pyramidImg[c][i][j] = temp;					
+						//pyramidImg[c][i][j] = toFixPointCount(temp / 4.0, 4);
+						pyramidImg[c][i][j] = toFixPointCount(temp , 4);
 					} else {
-						// pyramidImg[c][i][j] = Math.round(temp / 4.0);
+						 //pyramidImg[c][i][j] = Math.round(temp / 4.0);
 						// pyramidImg[c][i][j] = temp;
-						pyramidImg[c][i][j] = toFixPointCount(temp / 4.0, 4);// 当像素值为整数时，向下取整，当为小数时，取四位小数，
+						//pyramidImg[c][i][j] = toFixPointCount(temp / 4.0, 4);// 当像素值为整数时，向下取整，当为小数时，取四位小数，
 						// 设置一个变量flag标识为整数，还是小数
+						pyramidImg[c][i][j] = toFixPointCount(temp , 4);
 					}
 					/* System.out.println(temp); */
 					// System.out.print(pyramidImg[c][i][j] + " ");
@@ -402,13 +415,15 @@ public class MED extends publicClass {
 	}
 
 	// 将误差扩散到其他像素
-	public static double[][] ErrDifToOtherPixel(double BinaryValue, double[][] uniformImg, int i, int j) {
+	public static double[][] ErrDifToOtherPixel(double BinaryValue, double[][] uniformImg, double[][][] MarkPyraImg,int i, int j) {
 		/*
 		 * int h=uniformImg.length; int w=uniformImg[0].length;
 		 */
-
-		//double ErrorValue = toFixPointCount(uniformImg[i][j] - BinaryValue, 4);
-		double ErrorValue = uniformImg[i][j] - BinaryValue;
+       
+		double ErrorValue = toFixPointCount(uniformImg[i][j] - BinaryValue, 4);
+		// System.out.println(ErrorValue);
+		 
+		//double ErrorValue = uniformImg[i][j] - BinaryValue;
 		int[][] v = { { 2, 1, 2 },{ 1, 0, 1 }, { 2, 1, 2 } };
 
 		/* 最左边、最右边和最下边像素使用部分滤波器，其余使用完整滤波器 */
@@ -428,11 +443,11 @@ public class MED extends publicClass {
 			 * 
 			 * 
 			 */
-			uniformImg[i - 1][j-1] += (ErrorValue * 2) / 7;
-			uniformImg[i - 1][j] += (ErrorValue * 1) / 7;
-			uniformImg[i][j - 1] += (ErrorValue * 1) / 7;
-			uniformImg[i + 1][j - 1] += (ErrorValue * 2) / 7;
-			uniformImg[i + 1][j ] += (ErrorValue * 1) / 7;
+			uniformImg[i - 1][j-1] += toFixPointCount((ErrorValue * 2) / 7,4);
+			uniformImg[i - 1][j] += toFixPointCount((ErrorValue * 1) / 7,4);
+			uniformImg[i][j - 1] += toFixPointCount((ErrorValue * 1) / 7,4);
+			uniformImg[i + 1][j - 1] += toFixPointCount((ErrorValue * 2) / 7,4);
+			uniformImg[i + 1][j ] += toFixPointCount((ErrorValue * 1) / 7,4);
 
 			/* 防止溢出 */
 			/*
@@ -461,11 +476,11 @@ public class MED extends publicClass {
 			 * 
 			 * 
 			 */
-			uniformImg[i - 1][j ] += (ErrorValue * 1) / 7;
-			uniformImg[i - 1][j+1] += (ErrorValue * 2) / 7;
-			uniformImg[i][j + 1] += (ErrorValue * 1) / 7;
-			uniformImg[i + 1][j] += (ErrorValue * 1) / 7;
-			uniformImg[i + 1][j + 1] += (ErrorValue * 2) / 7;
+			uniformImg[i - 1][j ] += toFixPointCount((ErrorValue * 1) / 7,4) ;
+			uniformImg[i - 1][j+1] += toFixPointCount((ErrorValue * 2) / 7,4) ;
+			uniformImg[i][j + 1] += toFixPointCount((ErrorValue * 1) / 7,4) ;
+			uniformImg[i + 1][j] += toFixPointCount((ErrorValue * 1) / 7,4) ;
+			uniformImg[i + 1][j + 1] +=toFixPointCount((ErrorValue * 2) / 7,4);
 
 			/* 防止溢出 */
 			/*
@@ -489,11 +504,11 @@ public class MED extends publicClass {
 			 * 
 			 * 
 			 */
-			uniformImg[i - 1][j - 1] += (ErrorValue * 2) / 7;
-			uniformImg[i - 1][j] += (ErrorValue * 1) / 7;
-			uniformImg[i - 1][j + 1] += (ErrorValue * 2) / 7;
-			uniformImg[i][j - 1] += (ErrorValue * 1) / 7;
-			uniformImg[i][j + 1] += (ErrorValue * 1) / 7;
+			uniformImg[i - 1][j - 1] += toFixPointCount((ErrorValue * 2) / 7,4) ;
+			uniformImg[i - 1][j] += toFixPointCount((ErrorValue * 1) / 7,4) ;
+			uniformImg[i - 1][j + 1] += toFixPointCount((ErrorValue * 2) / 7,4) ;
+			uniformImg[i][j - 1] += toFixPointCount((ErrorValue * 1) / 7,4) ;
+			uniformImg[i][j + 1] += toFixPointCount((ErrorValue * 1) / 7,4) ;
 			/* 防止溢出 */
 			/*
 			 * if(uniformImg[i][j+1]>1) uniformImg[i][j+1]=1;
@@ -514,11 +529,11 @@ public class MED extends publicClass {
 			 * 
 			 * 
 			 */
-			uniformImg[i][j - 1] += (ErrorValue * 1) / 7;
-			uniformImg[i][j + 1] += (ErrorValue * 1) / 7;
-			uniformImg[i + 1][j - 1] += (ErrorValue * 2) / 7;
-			uniformImg[i + 1][j] += (ErrorValue * 1) / 7;
-			uniformImg[i + 1][j + 1] += (ErrorValue * 2) / 7;
+			uniformImg[i][j - 1] += toFixPointCount((ErrorValue * 1) / 7,4);
+			uniformImg[i][j + 1] += toFixPointCount((ErrorValue * 1) / 7,4);
+			uniformImg[i + 1][j - 1] += toFixPointCount((ErrorValue * 2) / 7,4);
+			uniformImg[i + 1][j] += toFixPointCount((ErrorValue * 1) / 7,4);
+			uniformImg[i + 1][j + 1] += toFixPointCount((ErrorValue * 2) / 7,4);
 
 			return uniformImg;
 		}
@@ -535,9 +550,9 @@ public class MED extends publicClass {
 			 * 
 			 * 
 			 */
-			uniformImg[i][j + 1] += (ErrorValue * 1) / 4;
-			uniformImg[i + 1][j] += (ErrorValue * 1) / 4;
-			uniformImg[i + 1][j + 1] += (ErrorValue * 2) / 4;
+			uniformImg[i][j + 1] += toFixPointCount((ErrorValue * 1) / 4,4);
+			uniformImg[i + 1][j] += toFixPointCount((ErrorValue * 1) / 4,4);
+			uniformImg[i + 1][j + 1] += toFixPointCount((ErrorValue * 2) / 4,4);
 
 			return uniformImg;
 		}
@@ -554,9 +569,9 @@ public class MED extends publicClass {
 			 * 
 			 * 
 			 */
-			uniformImg[i][j - 1] += (ErrorValue * 1) / 4;
-			uniformImg[i + 1][j - 1] += (ErrorValue * 2) / 4;
-			uniformImg[i + 1][j] += (ErrorValue * 1) / 4;
+			uniformImg[i][j - 1] += toFixPointCount((ErrorValue * 1) / 4,4);
+			uniformImg[i + 1][j - 1] += toFixPointCount((ErrorValue * 2) / 4,4);
+			uniformImg[i + 1][j] += toFixPointCount((ErrorValue * 1) / 4,4);
 
 			return uniformImg;
 		}
@@ -573,9 +588,9 @@ public class MED extends publicClass {
 			 * 
 			 * 
 			 */
-			uniformImg[i - 1][j] += (ErrorValue * 1) / 4;
-			uniformImg[i - 1][j + 1] += (ErrorValue * 2) / 4;
-			uniformImg[i][j + 1] += (ErrorValue * 1) / 4;
+			uniformImg[i - 1][j] += toFixPointCount((ErrorValue * 1) / 4,4);
+			uniformImg[i - 1][j + 1] += toFixPointCount((ErrorValue * 2) / 4,4);
+			uniformImg[i][j + 1] += toFixPointCount((ErrorValue * 1) / 4,4);
 
 			return uniformImg;
 		}
@@ -592,9 +607,9 @@ public class MED extends publicClass {
 			 * 
 			 * 
 			 */
-			uniformImg[i - 1][j - 1] += (ErrorValue * 2) / 4;
-			uniformImg[i - 1][j] += (ErrorValue * 1) / 4;
-			uniformImg[i][j - 1] += (ErrorValue * 1) / 4;
+			uniformImg[i - 1][j - 1] += toFixPointCount((ErrorValue * 2) / 4,4);
+			uniformImg[i - 1][j] += toFixPointCount((ErrorValue * 1) / 4,4);
+			uniformImg[i][j - 1] += toFixPointCount((ErrorValue * 1) / 4,4);
 
 			return uniformImg;
 		}
@@ -615,8 +630,15 @@ public class MED extends publicClass {
 		 */
 		 //针对一般位置像素 
 		  for (int k = -1; k < 2; k++)// 错误：k<2
-			for (int l = -1; l < 2; l++){ 
-				uniformImg[i + k][j + l] += ErrorValue * v[k + 1][l + 1] / 12;
+			for (int l = -1; l < 2; l++){
+				//System.out.println(uniformImg[i + k][j + l]);
+				if(MarkPyraImg[0][i+ k][j+ l] == 0){
+					uniformImg[i + k][j + l] += toFixPointCount(ErrorValue * v[k + 1][l + 1] / 12,4) ;
+					uniformImg[i + k][j + l] = toFixPointCount(uniformImg[i + k][j + l],4);
+				}
+				
+				//System.out.println(toFixPointCount(ErrorValue * v[k + 1][l + 1] / 12,4));
+				//System.out.println(uniformImg[i + k][j + l]);
 					/*
 					 * if(uniformImg[i+k][j+l]>1) uniformImg[i+k][j+l]=1;
 					 * if(uniformImg[i+k][j+l]<0) uniformImg[i+k][j+l]=0;
